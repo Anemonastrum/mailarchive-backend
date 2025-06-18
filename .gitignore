@@ -2,3 +2,4 @@ node_modules/
 *.log
 .env
 req.rest
+.DS_Store

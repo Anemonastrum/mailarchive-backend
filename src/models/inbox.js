@@ -1,16 +1,16 @@
 import mongoose from "mongoose";
 
-const OutboxSchema = new mongoose.Schema({
+const InboxSchema = new mongoose.Schema({
     number: { type: String, required: true, unique: true },
     attachment: { type: Number },
     attachmentUrls: [{ type: String }],
     category: { type: String, required: true },
     date: { type: Date, required: true },
-    destination: { type: String, required: true },
-    content: { type: String, required: true },
-    sign: { type: String, required: true },
+    recievedDate: { type: Date, required: true },
+    origin: { type: String, required: true },
+    status: { type: String, required: true },
     createdBy: { type: mongoose.Schema.Types.ObjectId },
     createdAt: { type: Date, default: Date.now },
 });
 
-export default mongoose.model('Outbox', OutboxSchema);
+export default mongoose.model('Inbox', InboxSchema);
