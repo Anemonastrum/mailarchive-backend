@@ -48,7 +48,7 @@ export const createOutbox = async (req, res) => {
       sign,
       attachment: attachmentUrls.length,
       attachmentUrls,
-      createdBy: req.user._id,
+      createdBy: req.user.name,
     });
 
     await outbox.save();

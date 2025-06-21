@@ -9,7 +9,7 @@ const OutboxSchema = new mongoose.Schema({
     destination: { type: String, required: true },
     content: { type: String, required: true },
     sign: { type: String, required: true },
-    createdBy: { type: mongoose.Schema.Types.ObjectId },
+    createdBy: { type: String },
     createdAt: { type: Date, default: Date.now },
 });
 

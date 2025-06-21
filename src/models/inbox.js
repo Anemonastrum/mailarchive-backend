@@ -8,8 +8,9 @@ const InboxSchema = new mongoose.Schema({
     date: { type: Date, required: true },
     recievedDate: { type: Date, required: true },
     origin: { type: String, required: true },
-    status: { type: String, required: true },
-    createdBy: { type: mongoose.Schema.Types.ObjectId },
+    summary: { type: String, required: true },
+    status: { type: String, required: true, default: 'wait' },
+    createdBy: { type: String },
     createdAt: { type: Date, default: Date.now },
 });
 
