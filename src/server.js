@@ -11,6 +11,9 @@ import configurePassport from './config/passport.js';
 import authRoutes from './routes/auth.js';
 import organizationRoutes from './routes/organization.js';
 import categoryRoutes from './routes/category.js';
+import inboxRoutes from './routes/inbox.js'
+import outboxRoutes from './routes/outbox.js'
+import statsRoutes from './routes/stats.js'
 
 dotenv.config();
 const app = express();
@@ -27,6 +30,9 @@ configurePassport(passport);
 app.use('/api/auth', authRoutes);
 app.use('/api/info', organizationRoutes);
 app.use('/api/category', categoryRoutes);
+app.use('/api/inbox', inboxRoutes);
+app.use('/api/outbox', outboxRoutes);
+app.use('/api/stats', statsRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Starting Server on port ${PORT}`));
