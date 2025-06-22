@@ -34,7 +34,7 @@ app.use('/api/category', categoryRoutes);
 app.use('/api/inbox', inboxRoutes);
 app.use('/api/outbox', outboxRoutes);
 app.use('/api/stats', statsRoutes);
-app.use('/api/user', user);
+app.use('/api/user', userRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Starting Server on port ${PORT}`));

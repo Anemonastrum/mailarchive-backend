@@ -139,7 +139,7 @@ export const deleteInbox = async (req, res) => {
       if (!inbox) return res.status(404).json({ message: 'data tidak ditemukan' });
   
       // hapus data dari minio
-      if (inbox.attachmentUrls && outbox.attachmentUrls.length > 0) {
+      if (inbox.attachmentUrls && inbox.attachmentUrls.length > 0) {
         for (const url of inbox.attachmentUrls) {
           const objectName = url.split(`/${BUCKET_NAME}/`)[1];
           if (objectName) {
