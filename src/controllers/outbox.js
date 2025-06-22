@@ -13,6 +13,7 @@ export const createOutbox = async (req, res) => {
       date,
       destination,
       content,
+      summary,
       sign,
     } = req.body;
 
@@ -45,6 +46,7 @@ export const createOutbox = async (req, res) => {
       date,
       destination,
       content,
+      summary,
       sign,
       attachment: attachmentUrls.length,
       attachmentUrls,
@@ -70,6 +72,7 @@ export const updateOutbox = async (req, res) => {
         date,
         destination,
         content,
+        summary,
         sign
       } = req.body;
   
@@ -83,6 +86,7 @@ export const updateOutbox = async (req, res) => {
       if (date) outbox.date = date;
       if (destination) outbox.destination = destination;
       if (content) outbox.content = content;
+      if (summary) outbox.summary = summary;
       if (sign) outbox.sign = sign;
   
       // klo ada file attach
@@ -170,6 +174,7 @@ export const getOutbox = async (req, res) => {
   
       const [outboxes, total] = await Promise.all([
         Outbox.find(query)
+          .select('number, destination, summary, attachment')
           .sort({ createdAt: -1 })
           .skip(skip)
           .limit(parseInt(limit)),

@@ -41,7 +41,7 @@ export const updateCategory = async (req, res) => {
 // get kategori
 export const getCategory = async (req, res) => {
   try {
-    const category = await Category.findOne();
+    const category = await Category.find();
 
     if (!category) {
       return res.status(404).json({ message: 'Category not found' });
@@ -52,4 +52,23 @@ export const getCategory = async (req, res) => {
     
     res.status(500).json({ message: 'Server Error', err });
   }
+};
+
+
+// delet kateori
+export const deleteCategory = async (req, res) => {
+    try {
+      const { id } = req.params;
+  
+      // verif data inbox
+      const category = await Category.findById(id);
+      if (!category) return res.status(404).json({ message: 'data tidak ditemukan' });
+  
+      await category.deleteOne();
+  
+      res.json({ message: 'ok' });
+  
+    } catch (err) {
+      res.status(500).json({ message: 'Server Error', err });
+    }
 };

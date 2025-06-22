@@ -8,6 +8,7 @@ const OutboxSchema = new mongoose.Schema({
     date: { type: Date, required: true },
     destination: { type: String, required: true },
     content: { type: String, required: true },
+    summary: { type: String, required: true },
     sign: { type: String, required: true },
     createdBy: { type: String },
     createdAt: { type: Date, default: Date.now },
