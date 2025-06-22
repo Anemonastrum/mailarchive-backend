@@ -14,6 +14,7 @@ import categoryRoutes from './routes/category.js';
 import inboxRoutes from './routes/inbox.js'
 import outboxRoutes from './routes/outbox.js'
 import statsRoutes from './routes/stats.js'
+import userRoutes from './routes/user.js'
 
 dotenv.config();
 const app = express();
@@ -33,6 +34,7 @@ app.use('/api/category', categoryRoutes);
 app.use('/api/inbox', inboxRoutes);
 app.use('/api/outbox', outboxRoutes);
 app.use('/api/stats', statsRoutes);
+app.use('/api/user', user);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Starting Server on port ${PORT}`));

@@ -1,4 +1,4 @@
-import Inbox from '../models/outbox.js';
+import Inbox from '../models/inbox.js';
 import { minioClient } from '../config/minio.js';
 import crypto from 'crypto';
 
@@ -170,7 +170,7 @@ export const getInbox = async (req, res) => {
   
       const [inboxes, total] = await Promise.all([
         Inbox.find(query)
-          .select('recievedDate, number, origin, summary, attachment')
+          .select('recievedDate number origin summary attachment')
           .sort({ createdAt: -1 })
           .skip(skip)
           .limit(parseInt(limit)),
@@ -222,7 +222,7 @@ export const getInboxDisposisi = async (req, res) => {
   
       const [inboxes, total] = await Promise.all([
         Inbox.find(query)
-          .select('status, recievedDate, origin, summary')
+          .select('status recievedDate origin summary')
           .sort({ createdAt: -1 })
           .skip(skip)
           .limit(parseInt(limit)),

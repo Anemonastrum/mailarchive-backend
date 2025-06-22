@@ -174,7 +174,7 @@ export const getOutbox = async (req, res) => {
   
       const [outboxes, total] = await Promise.all([
         Outbox.find(query)
-          .select('number, destination, summary, attachment')
+          .select('number destination summary attachment date')
           .sort({ createdAt: -1 })
           .skip(skip)
           .limit(parseInt(limit)),

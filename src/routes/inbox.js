@@ -16,9 +16,9 @@ import role from '../middleware/role.js';
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
 
+router.get('/disposisi', auth, role('superadmin'), getInboxDisposisi);
 router.get('/', auth, getInbox);
 router.get('/:id', auth, getInboxById);
-router.get('/disposisi', auth, role('superadmin'), getInboxDisposisi);
 router.post('/', auth, role('admin', 'superadmin'), upload.array('attachments'), createInbox);
 router.put('/:id', auth, role('admin', 'superadmin'), upload.array('attachments'), updateInbox);
 router.delete('/:id', auth, role('admin', 'superadmin'), deleteInbox);
