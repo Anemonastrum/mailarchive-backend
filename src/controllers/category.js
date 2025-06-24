@@ -1,4 +1,4 @@
-import Category from "../models/category.js";
+import Category from '../models/category.js';
 
 // buat kategori, dayum cuma nama doang
 export const createCategory = async (req, res) => {

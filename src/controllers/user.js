@@ -1,4 +1,4 @@
-import User from '../models/user';
+import User from '../models/user.js';
 import { minioClient } from '../config/minio.js';
 import crypto from 'crypto';
 import bcrypt from 'bcrypt';

@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
 const OutboxSchema = new mongoose.Schema({
     number: { type: String, required: true, unique: true },
