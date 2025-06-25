@@ -58,6 +58,14 @@ export const loginUser = async (req, res, next) => {
     const payload = { user: { id: user.id } };
     const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
 
+     // Set token di httpOnly cookie
+     res.cookie('token', token, {
+      httpOnly: true,
+      secure: false, // true jika sudah HTTPS
+      sameSite: 'strict',
+      maxAge: 60 * 60 * 1000
+    });
+
     res.json({ token });
   } catch (err) {
     res.status(500).json({ message: 'Server error', error: err.message });

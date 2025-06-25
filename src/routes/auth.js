@@ -16,5 +16,13 @@ router.post('/register', registerCheck, registerSuperAdmin);
 router.post('/register/member', registerCheck, registerAdminMember);
 router.post('/login', loginCheck, loginUser);
 router.get('/user', auth, role('admin', 'superadmin', 'user'), getUser);
+router.post('/logout', (req, res) => {
+    res.clearCookie('token', {
+      httpOnly: true,
+      sameSite: 'strict',
+      secure: false // ganti true jika sudah pakai HTTPS di production
+    });
+    res.json({ message: 'Logout success' });
+  });
 
 export default router;

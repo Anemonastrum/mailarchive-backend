@@ -2,6 +2,8 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import passport from 'passport';
+import cors from 'cors';
+import cookieParser from 'cookie-parser';
 
 // konfig
 import koneksidotjs from './config/database.js';
@@ -24,6 +26,11 @@ koneksidotjs();
 
 // Middleware
 app.use(express.json());
+app.use(cookieParser());
+app.use(cors({
+  origin: 'http://localhost:5173',
+  credentials: true,
+}));
 app.use(passport.initialize());
 configurePassport(passport);
 
