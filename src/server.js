@@ -28,7 +28,7 @@ koneksidotjs();
 app.use(express.json());
 app.use(cookieParser());
 app.use(cors({
-  origin: 'http://localhost:5173',
+  origin: [ 'http://localhost:5173', 'http://localhost:5174' ],
   credentials: true,
 }));
 app.use(passport.initialize());
@@ -36,7 +36,7 @@ configurePassport(passport);
 
 // Routes
 app.use('/api/auth', authRoutes);
-app.use('/api/info', organizationRoutes);
+app.use('/api/organization', organizationRoutes);
 app.use('/api/category', categoryRoutes);
 app.use('/api/inbox', inboxRoutes);
 app.use('/api/outbox', outboxRoutes);
