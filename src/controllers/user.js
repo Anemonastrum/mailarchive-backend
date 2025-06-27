@@ -91,3 +91,137 @@ export const changePassword = async (req, res) => {
   }
 };
 
+// get user list
+
+export const getUserList = async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const search = req.query.search || '';
+
+    const query = {
+      $or: [
+        { name: { $regex: search, $options: 'i' } },
+        { username: { $regex: search, $options: 'i' } },
+        { role: { $regex: search, $options: 'i' } }
+      ]
+    };
+
+    const total = await User.countDocuments(query);
+    const users = await User.find(query)
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .select('name number role username status position address') // Exclude password
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      message: 'ok',
+      users,
+      pagination: {
+        total,
+        page,
+        pages: Math.ceil(total / limit)
+      }
+    });
+  } catch (err) {
+    res.status(500).json({ message: 'Server Error', err });
+  }
+};
+
+// Admin update user
+export const manageUser = async (req, res) => {
+  try {
+    const { id } = req.params; // user ID from URL
+    const { name, address, position, number, status, role } = req.body;
+
+    const user = await User.findById(id);
+    if (!user) return res.status(404).json({ message: 'User tidak ditemukan' });
+
+    if (name) user.name = name;
+    if (address) user.address = address;
+    if (position) user.position = position;
+    if (number) user.number = number;
+    if (status) user.status = status;
+    if (role) user.role = role;
+
+    await user.save();
+
+    res.status(200).json({
+      message: 'User berhasil diupdate',
+      user: {
+        id: user._id,
+        name: user.name,
+        username: user.username,
+        role: user.role,
+        status: user.status
+      }
+    });
+  } catch (err) {
+    res.status(500).json({ message: 'Server Error', err });
+  }
+};
+
+// Superadmin: register new user
+export const registerUser = async (req, res) => {
+  try {
+    const { name, username, password, address, position, number, role, status } = req.body;
+
+    // Check required fields
+    if (!name || !username || !password) {
+      return res.status(400).json({ message: 'Name, username, and password are required' });
+    }
+
+    // Check if username already exists
+    const existing = await User.findOne({ username });
+    if (existing) {
+      return res.status(409).json({ message: 'Username sudah digunakan' });
+    }
+
+    // Create user
+    const newUser = new User({
+      name,
+      username,
+      password,
+      address,
+      position,
+      number,
+      role: role || 'user',
+      status: status || 'active',
+    });
+
+    await newUser.save();
+
+    res.status(201).json({
+      message: 'User berhasil didaftarkan',
+      user: {
+        id: newUser._id,
+        name: newUser.name,
+        username: newUser.username,
+        role: newUser.role,
+        status: newUser.status,
+      }
+    });
+
+  } catch (err) {
+    res.status(500).json({ message: 'Server Error', err });
+  }
+};
+
+export const getUserById = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const user = await User.findById(id).select('-password'); // Exclude password
+
+    if (!user) {
+      return res.status(404).json({ message: 'User tidak ditemukan' });
+    }
+
+    res.status(200).json({
+      message: 'ok',
+      user
+    });
+  } catch (err) {
+    res.status(500).json({ message: 'Server Error', err });
+  }
+};

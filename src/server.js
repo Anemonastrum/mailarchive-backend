@@ -17,6 +17,7 @@ import inboxRoutes from './routes/inbox.js'
 import outboxRoutes from './routes/outbox.js'
 import statsRoutes from './routes/stats.js'
 import userRoutes from './routes/user.js'
+import logbookRoutes from './routes/logbook.js'
 
 dotenv.config();
 const app = express();
@@ -42,6 +43,7 @@ app.use('/api/inbox', inboxRoutes);
 app.use('/api/outbox', outboxRoutes);
 app.use('/api/stats', statsRoutes);
 app.use('/api/user', userRoutes);
+app.use('/api/logbook', logbookRoutes)
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Starting Server on port ${PORT}`));

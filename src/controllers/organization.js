@@ -51,8 +51,8 @@ export const createOrganization = async (req, res) => {
 // update data org
 export const updateOrganization = async (req, res) => {
   try {
-    const { name, address, number } = req.body;
-    const updates = { name, address, number };
+    const { name, address, number, email } = req.body;
+    const updates = { name, address, number, email };
 
     // ganti logo kalo ada file baru
     if (req.file) {

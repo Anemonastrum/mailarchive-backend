@@ -9,6 +9,7 @@ const UserSchema = new mongoose.Schema({
   address: { type: String },
   position: { type: String, default: "Member" },
   number: { type: Number },
+  status: { type: String, enum: [ "active", "not"], default: "active " },
   role: {
     type: String,
     enum: ["user", "admin", "superadmin"],

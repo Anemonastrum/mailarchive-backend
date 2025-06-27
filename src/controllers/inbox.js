@@ -25,13 +25,14 @@ export const createInbox = async (req, res) => {
       for (const file of req.files) {
         const ext = file.originalname.split('.').pop();
         const fileName = `${crypto.randomUUID()}.${ext}`;
+        const mimeType = file.mimetype || 'application/octet-stream';
 
         await minioClient.putObject(
           BUCKET_NAME,
           fileName,
           file.buffer,
           file.size,
-          file.mimetype
+           { 'Content-Type': mimeType }
         );
 
         const fileUrl = `${process.env.MINIO_PUBLIC_URL}/${BUCKET_NAME}/${fileName}`;
@@ -102,13 +103,14 @@ export const updateInbox = async (req, res) => {
         for (const file of req.files) {
           const ext = file.originalname.split('.').pop();
           const fileName = `${crypto.randomUUID()}.${ext}`;
+          const mimeType = file.mimetype || 'application/octet-stream';
   
           await minioClient.putObject(
             BUCKET_NAME,
             fileName,
             file.buffer,
             file.size,
-            file.mimetype
+            { 'Content-Type': mimeType }
           );
   
           const fileUrl = `${process.env.MINIO_PUBLIC_URL}/${BUCKET_NAME}/${fileName}`;
@@ -222,7 +224,7 @@ export const getInboxDisposisi = async (req, res) => {
   
       const [inboxes, total] = await Promise.all([
         Inbox.find(query)
-          .select('status recievedDate origin summary')
+          .select('status recievedDate origin summary createdBy number attachment')
           .sort({ createdAt: -1 })
           .skip(skip)
           .limit(parseInt(limit)),
@@ -239,4 +241,30 @@ export const getInboxDisposisi = async (req, res) => {
     } catch (err) {
       res.status(500).json({ message: 'Server Error', err });
     }
+};
+
+// aksi superadmin
+export const updateInboxAction = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { action } = req.body;
+
+    if (!action) {
+      return res.status(400).json({ message: 'Action is required' });
+    }
+
+    const inbox = await Inbox.findById(id);
+    if (!inbox) {
+      return res.status(404).json({ message: 'Inbox mail not found' });
+    }
+
+    inbox.action = action;
+    inbox.status = 'done';
+    await inbox.save();
+
+    res.status(200).json({ message: 'Inbox updated successfully', inbox });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server Error', err });
+  }
 };

@@ -7,9 +7,10 @@ const OutboxSchema = new mongoose.Schema({
     category: { type: String, required: true },
     date: { type: Date, required: true },
     destination: { type: String, required: true },
-    content: { type: String, required: true },
     summary: { type: String, required: true },
-    sign: { type: String, required: true },
+    sign: { type: String },
+    content: { type: String },
+    pdfUrl: { type: String },
     createdBy: { type: String },
     createdAt: { type: Date, default: Date.now },
 });

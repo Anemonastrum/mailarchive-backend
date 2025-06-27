@@ -7,7 +7,8 @@ import {
   deleteInbox,
   getInbox,
   getInboxById,
-  getInboxDisposisi
+  getInboxDisposisi,
+  updateInboxAction
 } from '../controllers/inbox.js';
 
 import auth from '../middleware/auth.js';
@@ -22,5 +23,6 @@ router.get('/:id', auth, getInboxById);
 router.post('/', auth, role('admin', 'superadmin'), upload.array('attachments'), createInbox);
 router.put('/:id', auth, role('admin', 'superadmin'), upload.array('attachments'), updateInbox);
 router.delete('/:id', auth, role('admin', 'superadmin'), deleteInbox);
+router.put('/disposisi/:id', auth, role('superadmin'), updateInboxAction);
 
 export default router;
