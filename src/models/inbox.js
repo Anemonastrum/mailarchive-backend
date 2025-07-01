@@ -11,6 +11,7 @@ const InboxSchema = new mongoose.Schema({
     summary: { type: String, required: true },
     status: { type: String, required: true, default: 'wait' },
     action: { type: String },
+    mailUrl: { type: String },
     createdBy: { type: String },
     createdAt: { type: Date, default: Date.now },
 });

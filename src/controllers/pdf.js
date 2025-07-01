@@ -26,7 +26,6 @@ export const createOutboxPDF = async (req, res) => {
       destination,
       content,
       summary,
-      sign,
       orgName,
       orgNumber,
       orgAddress,
@@ -57,9 +56,9 @@ export const createOutboxPDF = async (req, res) => {
       destination,
       summary,
       content,
-      sign,
       attachment: attachmentUrls.length,
       attachmentUrls,
+      status: 'wait',
       createdBy: req.user.name,
     });
     await outbox.save();
@@ -75,7 +74,7 @@ export const createOutboxPDF = async (req, res) => {
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Surat Keluar</title>
   <style>
     body {
@@ -108,17 +107,15 @@ export const createOutboxPDF = async (req, res) => {
       flex: 1;
     }
 
-    .kop h2, .kop h3 {
-      margin: 0;
-    }
-
     .kop h2 {
       font-size: 20pt;
       font-weight: bold;
+      margin: 0;
     }
 
     .kop h3 {
       font-size: 18pt;
+      margin: 0;
     }
 
     .kop p {
@@ -151,25 +148,72 @@ export const createOutboxPDF = async (req, res) => {
       text-align: justify;
     }
 
-    .ttd {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 40px;
+    .tabel-mahasiswa {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 15px 0;
       font-size: 13pt;
     }
 
-    .ttd .left,
-    .ttd .right {
-      width: 45%;
+    .tabel-mahasiswa th, .tabel-mahasiswa td {
+      border: 1px solid #000;
+      padding: 5px 10px;
+      text-align: left;
+    }
+
+    .atas-ttd {
+      position: absolute;
+      top: -50px;
+      left: 50%;
+      transform: translateX(-50%);
+      text-align: center;
+      font-size: 13pt;
+      line-height: 1.2;
+    }
+
+    .cap {
+      position: absolute;
+      top: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      opacity: 0.4;
+      width: 140px;
+      z-index: 0;
+      margin-top: 30px;
+      margin-left: 30px;
+    }
+
+    .ttd {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 80px;
+      font-size: 13pt;
+      position: relative;
+    }
+
+    .ttd .left, .ttd .right {
+      width: 40%;
       text-align: center;
     }
+
+    .ttd .ttd-img {
+      width: 160px;
+      margin: 0 auto 10px;
+      display: block;
+    }
+
+    .ttd p {
+      margin: 4px 0;
+      z-index: 1;
+      position: relative;
+    }
+
   </style>
 </head>
-
 <body>
   <div class="container">
     <header>
-      <img src="${orgLogoUrl}" alt="Logo Organisasi" class="logo">
+      <img src="${orgLogoUrl}" class="logo">
       <div class="kop">
         <h2>${orgName || "PIMPINAN CABANG ‘AISYIYAH"}</h2>
         <h3>MOJOTENGAH</h3>
@@ -209,20 +253,32 @@ export const createOutboxPDF = async (req, res) => {
     </section>
 
     <section class="ttd">
+
+     <div class="atas-ttd">
+        <p>PIMPINAN CABANG 'AISYIYAH</p>
+        <p>MOJOTENGAH</p>
+      </div>
+
+      <img src="https://minio.warungmicky.shop/aisyiyah/assets/cap.jpg" alt="Cap Stempel" class="cap" />
+
       <div class="left">
         <p><strong>Ketua,</strong></p>
-        <br><br>
-        <p><strong>${sign || 'Nama Ketua'}</strong></p>
+        <img src="https://minio.warungmicky.shop/aisyiyah/assets/ttdketua.png" alt="Tanda Tangan Ketua" class="ttd-img">
+        <p><strong>Hj. Marfu’ah, S.Pd.SD</strong></p>
+        <p>NBM: 529 307</p>
       </div>
+
       <div class="right">
         <p><strong>Sekretaris,</strong></p>
-        <br><br>
+        <img src="https://minio.warungmicky.shop/aisyiyah/assets/ttdsekretaris.png" alt="Tanda Tangan Sekretaris" class="ttd-img">
         <p><strong>Masitoh</strong></p>
+        <p>NBM: 618 500</p>
       </div>
     </section>
   </div>
 </body>
-</html>`;
+</html>
+`;
 
     const file = { content: html };
     const pdfBuffer = await html_to_pdf.generatePdf(file, {
@@ -263,7 +319,6 @@ export const updateOutboxPDF = async (req, res) => {
       destination,
       content,
       summary,
-      sign,
       orgName,
       orgNumber,
       orgAddress,
@@ -303,7 +358,7 @@ export const updateOutboxPDF = async (req, res) => {
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Surat Keluar</title>
   <style>
     body {
@@ -336,17 +391,15 @@ export const updateOutboxPDF = async (req, res) => {
       flex: 1;
     }
 
-    .kop h2, .kop h3 {
-      margin: 0;
-    }
-
     .kop h2 {
       font-size: 20pt;
       font-weight: bold;
+      margin: 0;
     }
 
     .kop h3 {
       font-size: 18pt;
+      margin: 0;
     }
 
     .kop p {
@@ -379,25 +432,72 @@ export const updateOutboxPDF = async (req, res) => {
       text-align: justify;
     }
 
-    .ttd {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 40px;
+    .tabel-mahasiswa {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 15px 0;
       font-size: 13pt;
     }
 
-    .ttd .left,
-    .ttd .right {
-      width: 45%;
+    .tabel-mahasiswa th, .tabel-mahasiswa td {
+      border: 1px solid #000;
+      padding: 5px 10px;
+      text-align: left;
+    }
+
+    .atas-ttd {
+      position: absolute;
+      top: -50px;
+      left: 50%;
+      transform: translateX(-50%);
+      text-align: center;
+      font-size: 13pt;
+      line-height: 1.2;
+    }
+
+    .cap {
+      position: absolute;
+      top: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      opacity: 0.4;
+      width: 140px;
+      z-index: 0;
+      margin-top: 30px;
+      margin-left: 30px;
+    }
+
+    .ttd {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 80px;
+      font-size: 13pt;
+      position: relative;
+    }
+
+    .ttd .left, .ttd .right {
+      width: 40%;
       text-align: center;
     }
+
+    .ttd .ttd-img {
+      width: 160px;
+      margin: 0 auto 10px;
+      display: block;
+    }
+
+    .ttd p {
+      margin: 4px 0;
+      z-index: 1;
+      position: relative;
+    }
+
   </style>
 </head>
-
 <body>
   <div class="container">
     <header>
-      <img src="${orgLogoUrl}" alt="Logo Organisasi" class="logo">
+      <img src="${orgLogoUrl}" class="logo">
       <div class="kop">
         <h2>${orgName || "PIMPINAN CABANG ‘AISYIYAH"}</h2>
         <h3>MOJOTENGAH</h3>
@@ -437,20 +537,32 @@ export const updateOutboxPDF = async (req, res) => {
     </section>
 
     <section class="ttd">
+
+     <div class="atas-ttd">
+        <p>PIMPINAN CABANG 'AISYIYAH</p>
+        <p>MOJOTENGAH</p>
+      </div>
+
+      <img src="https://minio.warungmicky.shop/aisyiyah/assets/cap.jpg" alt="Cap Stempel" class="cap" />
+
       <div class="left">
         <p><strong>Ketua,</strong></p>
-        <br><br>
-        <p><strong>${sign || 'Nama Ketua'}</strong></p>
+        <img src="https://minio.warungmicky.shop/aisyiyah/assets/ttdketua.png" alt="Tanda Tangan Ketua" class="ttd-img">
+        <p><strong>Hj. Marfu’ah, S.Pd.SD</strong></p>
+        <p>NBM: 529 307</p>
       </div>
+
       <div class="right">
         <p><strong>Sekretaris,</strong></p>
-        <br><br>
+        <img src="https://minio.warungmicky.shop/aisyiyah/assets/ttdsekretaris.png" alt="Tanda Tangan Sekretaris" class="ttd-img">
         <p><strong>Masitoh</strong></p>
+        <p>NBM: 618 500</p>
       </div>
     </section>
   </div>
 </body>
-</html>`;
+</html>
+`;
 
     const file = { content: html };
     const pdfBuffer = await html_to_pdf.generatePdf(file, {
@@ -475,7 +587,6 @@ export const updateOutboxPDF = async (req, res) => {
     outbox.destination = destination;
     outbox.summary = summary;
     outbox.content = content;
-    outbox.sign = sign;
     outbox.attachment = attachmentUrls.length;
     outbox.attachmentUrls = attachmentUrls;
     outbox.pdfUrl = pdfUrl;

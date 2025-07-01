@@ -29,7 +29,8 @@ export const getStats = async (req, res) => {
 
 export const getMonthlyLetterStats = async (req, res) => {
   try {
-    const year = new Date().getFullYear();
+    const { year: paramYear } = req.params;
+    const year = parseInt(paramYear) || new Date().getFullYear();
 
     const matchStage = {
       $match: {
@@ -60,8 +61,7 @@ export const getMonthlyLetterStats = async (req, res) => {
       Outbox.aggregate([matchStage, groupStage, projectStage])
     ]);
 
-    // Combine both counts into one map
-    const combined = Array(12).fill(0).map((_, index) => ({
+    const combined = Array.from({ length: 12 }, (_, index) => ({
       month: index + 1,
       inboxCount: 0,
       outboxCount: 0,
@@ -83,11 +83,11 @@ export const getMonthlyLetterStats = async (req, res) => {
       year,
       data: combined
     });
-
   } catch (err) {
     res.status(500).json({ message: 'Server Error', err });
   }
 };
+
 
 // get data outbox kategori total 
 
@@ -118,6 +118,19 @@ export const getOutboxStatsByCategory = async (req, res) => {
       data: result
     });
 
+  } catch (err) {
+    res.status(500).json({ message: 'Server Error', err });
+  }
+};
+
+export const getTotalWaitingInbox = async (req, res) => {
+  try {
+    const waitCount = await Inbox.countDocuments({ status: 'wait' });
+
+    res.status(200).json({
+      message: 'ok',
+      totalWaitingInbox: waitCount
+    });
   } catch (err) {
     res.status(500).json({ message: 'Server Error', err });
   }

@@ -6,7 +6,9 @@ import {
   updateOutbox,
   deleteOutbox,
   getOutbox,
-  getOutboxById
+  getOutboxById,
+  getOutboxDisposisi,
+  updateOutboxVerif
 } from '../controllers/outbox.js';
 
 import {
@@ -21,9 +23,12 @@ const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
 
 router.get('/', auth, getOutbox);
+router.get('/verifikasi', auth, role('admin', 'superadmin'), getOutboxDisposisi);
+router.put('/verifikasi/:id', auth, role('superadmin'), updateOutboxVerif);
 router.get('/:id', auth, getOutboxById);
 router.post('/', auth, role('admin', 'superadmin'), upload.array('attachments'), createOutboxPDF);
 router.put('/:id', auth, role('admin', 'superadmin'), upload.array('attachments'), updateOutboxPDF);
 router.delete('/:id', auth, role('admin', 'superadmin'), deleteOutbox);
+
 
 export default router;

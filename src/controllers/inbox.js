@@ -13,31 +13,50 @@ export const createInbox = async (req, res) => {
       date,
       recievedDate,
       origin,
-      summary
+      summary,
     } = req.body;
 
     const exist = await Inbox.findOne({ number });
     if (exist) return res.status(400).json({ message: 'nomor surat sudah ada' });
 
-    let attachmentUrls = [];
+    // ✅ Access mailPic (required)
+    const mailPicFile = req.files?.mailPic?.[0];
+    if (!mailPicFile) {
+      return res.status(400).json({ message: 'Gambar surat (mailPic) wajib diunggah' });
+    }
 
-    if (req.files && req.files.length > 0) {
-      for (const file of req.files) {
-        const ext = file.originalname.split('.').pop();
-        const fileName = `${crypto.randomUUID()}.${ext}`;
-        const mimeType = file.mimetype || 'application/octet-stream';
+    const mailPicExt = mailPicFile.originalname.split('.').pop();
+    const mailPicName = `${crypto.randomUUID()}.${mailPicExt}`;
+    const mailPicMime = mailPicFile.mimetype || 'application/octet-stream';
 
-        await minioClient.putObject(
-          BUCKET_NAME,
-          fileName,
-          file.buffer,
-          file.size,
-           { 'Content-Type': mimeType }
-        );
+    await minioClient.putObject(
+      BUCKET_NAME,
+      mailPicName,
+      mailPicFile.buffer,
+      mailPicFile.size,
+      { 'Content-Type': mailPicMime }
+    );
 
-        const fileUrl = `${process.env.MINIO_PUBLIC_URL}/${BUCKET_NAME}/${fileName}`;
-        attachmentUrls.push(fileUrl);
-      }
+    const mailUrl = `${process.env.MINIO_PUBLIC_URL}/${BUCKET_NAME}/${mailPicName}`;
+
+    // ✅ Optional: attachments
+    const attachmentUrls = [];
+    const attachments = req.files?.attachments || [];
+    for (const file of attachments) {
+      const ext = file.originalname.split('.').pop();
+      const fileName = `${crypto.randomUUID()}.${ext}`;
+      const mimeType = file.mimetype || 'application/octet-stream';
+
+      await minioClient.putObject(
+        BUCKET_NAME,
+        fileName,
+        file.buffer,
+        file.size,
+        { 'Content-Type': mimeType }
+      );
+
+      const fileUrl = `${process.env.MINIO_PUBLIC_URL}/${BUCKET_NAME}/${fileName}`;
+      attachmentUrls.push(fileUrl);
     }
 
     const inbox = new Inbox({
@@ -47,6 +66,7 @@ export const createInbox = async (req, res) => {
       recievedDate,
       origin,
       summary,
+      mailUrl,
       attachment: attachmentUrls.length,
       attachmentUrls,
       createdBy: req.user.name,
@@ -57,78 +77,99 @@ export const createInbox = async (req, res) => {
     res.status(201).json({ message: 'ok', inbox });
 
   } catch (err) {
+    console.error(err);
     res.status(500).json({ message: 'Server Error', err });
   }
 };
 
+
 // edit surat masuk
 export const updateInbox = async (req, res) => {
-    try {
-      const { id } = req.params;
-      const {
-        number,
-        category,
-        date,
-        recievedDate,
-        origin,
-        summary
-      } = req.body;
-  
-      // verif data inbox
-      const inbox = await Inbox.findById(id);
-      if (!inbox) return res.status(404).json({ message: 'data gaada' });
-  
-      // handle fields
-      if (number) inbox.number = number;
-      if (category) inbox.category = category;
-      if (date) inbox.date = date;
-      if (origin) inbox.origin = origin;
-      if (recievedDate) inbox.recievedDate = recievedDate;
-      if (summary) inbox.summary = summary;
-  
-      // klo ada file attach
-      if (req.files && req.files.length > 0) {
-        // hapus data lama dari minio
-        if (inbox.attachmentUrls && inbox.attachmentUrls.length > 0) {
-          for (const url of inbox.attachmentUrls) {
-            const objectName = url.split(`/${BUCKET_NAME}/`)[1];
-            if (objectName) {
-              await minioClient.removeObject(BUCKET_NAME, objectName);
-            }
+  try {
+    const { id } = req.params;
+    const {
+      number,
+      category,
+      date,
+      recievedDate,
+      origin,
+      summary,
+    } = req.body;
+
+    const inbox = await Inbox.findById(id);
+    if (!inbox) return res.status(404).json({ message: 'Data tidak ditemukan' });
+
+    // Update basic fields
+    if (number) inbox.number = number;
+    if (category) inbox.category = category;
+    if (date) inbox.date = date;
+    if (recievedDate) inbox.recievedDate = recievedDate;
+    if (origin) inbox.origin = origin;
+    if (summary) inbox.summary = summary;
+
+    const mailPic = req.files?.mailPic?.[0];
+    if (mailPic) {
+      if (inbox.mailUrl) {
+        const oldMailPicObject = inbox.mailUrl.split(`/${BUCKET_NAME}/`)[1];
+        if (oldMailPicObject) {
+          await minioClient.removeObject(BUCKET_NAME, oldMailPicObject);
+        }
+      }
+
+      const mailExt = mailPic.originalname.split('.').pop();
+      const mailName = `${crypto.randomUUID()}.${mailExt}`;
+      const mailMime = mailPic.mimetype || 'application/octet-stream';
+
+      await minioClient.putObject(
+        BUCKET_NAME,
+        mailName,
+        mailPic.buffer,
+        mailPic.size,
+        { 'Content-Type': mailMime }
+      );
+
+      inbox.mailUrl = `${process.env.MINIO_PUBLIC_URL}/${BUCKET_NAME}/${mailName}`;
+    }
+
+    const attachments = req.files?.attachments || [];
+    if (attachments.length > 0) {
+      if (inbox.attachmentUrls && inbox.attachmentUrls.length > 0) {
+        for (const url of inbox.attachmentUrls) {
+          const objectName = url.split(`/${BUCKET_NAME}/`)[1];
+          if (objectName) {
+            await minioClient.removeObject(BUCKET_NAME, objectName);
           }
         }
-  
-        let newAttachmentUrls = [];
-  
-        for (const file of req.files) {
-          const ext = file.originalname.split('.').pop();
-          const fileName = `${crypto.randomUUID()}.${ext}`;
-          const mimeType = file.mimetype || 'application/octet-stream';
-  
-          await minioClient.putObject(
-            BUCKET_NAME,
-            fileName,
-            file.buffer,
-            file.size,
-            { 'Content-Type': mimeType }
-          );
-  
-          const fileUrl = `${process.env.MINIO_PUBLIC_URL}/${BUCKET_NAME}/${fileName}`;
-          newAttachmentUrls.push(fileUrl);
-        }
-  
-        inbox.attachment = newAttachmentUrls.length | 1;
-        inbox.attachmentUrls = newAttachmentUrls;
       }
-  
-      await inbox.save();
-  
-      res.json({ message: 'ok', inbox });
-  
-    } catch (err) {
 
-      res.status(500).json({ message: 'Server Error', err });
+      const newAttachmentUrls = [];
+      for (const file of attachments) {
+        const ext = file.originalname.split('.').pop();
+        const fileName = `${crypto.randomUUID()}.${ext}`;
+        const mimeType = file.mimetype || 'application/octet-stream';
+
+        await minioClient.putObject(
+          BUCKET_NAME,
+          fileName,
+          file.buffer,
+          file.size,
+          { 'Content-Type': mimeType }
+        );
+
+        const fileUrl = `${process.env.MINIO_PUBLIC_URL}/${BUCKET_NAME}/${fileName}`;
+        newAttachmentUrls.push(fileUrl);
+      }
+
+      inbox.attachmentUrls = newAttachmentUrls;
+      inbox.attachment = newAttachmentUrls.length;
     }
+
+    await inbox.save();
+    res.json({ message: 'ok', inbox });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server Error', err });
+  }
 };
 
 // hapus surat masuk

@@ -15,12 +15,13 @@ export const updateUserSelf = async (req, res) => {
 
     if (!user) return res.status(404).json({ message: 'User tidak ditemukan' });
 
-    const { name, address, position, number } = req.body;
+    const { name, address, position, number, nbm } = req.body;
 
     if (name) user.name = name;
     if (address) user.address = address;
     if (position) user.position = position;
     if (number) user.number = number;
+    if (nbm) user.nbm = nbm;
 
     // update minio delet klo ada
     if (req.file) {
@@ -55,6 +56,7 @@ export const updateUserSelf = async (req, res) => {
         address: user.address,
         position: user.position,
         number: user.number,
+        nbm: user.nbm,
         pictureUrl: user.pictureUrl
       }
     });
@@ -79,8 +81,7 @@ export const changePassword = async (req, res) => {
       return res.status(400).json({ message: 'Password lama salah' });
     }
 
-    const salt = await bcrypt.genSalt(10);
-    user.password = await bcrypt.hash(newPassword, salt);
+    user.password = newPassword
 
     await user.save();
 
@@ -111,7 +112,7 @@ export const getUserList = async (req, res) => {
     const users = await User.find(query)
       .skip((page - 1) * limit)
       .limit(limit)
-      .select('name number role username status position address') // Exclude password
+      .select('name nbm role status position') // Exclude password
       .sort({ createdAt: -1 });
 
     res.status(200).json({
@@ -132,13 +133,13 @@ export const getUserList = async (req, res) => {
 export const manageUser = async (req, res) => {
   try {
     const { id } = req.params; // user ID from URL
-    const { name, address, position, number, status, role } = req.body;
+    const { name, nbm, position, number, status, role } = req.body;
 
     const user = await User.findById(id);
     if (!user) return res.status(404).json({ message: 'User tidak ditemukan' });
 
     if (name) user.name = name;
-    if (address) user.address = address;
+    if (nbm) user.nbm = nbm;
     if (position) user.position = position;
     if (number) user.number = number;
     if (status) user.status = status;
@@ -151,6 +152,7 @@ export const manageUser = async (req, res) => {
       user: {
         id: user._id,
         name: user.name,
+        nbm: user.nbm,
         username: user.username,
         role: user.role,
         status: user.status
@@ -164,7 +166,7 @@ export const manageUser = async (req, res) => {
 // Superadmin: register new user
 export const registerUser = async (req, res) => {
   try {
-    const { name, username, password, address, position, number, role, status } = req.body;
+    const { name, username, password, address, position, number, role, status, nbm } = req.body;
 
     // Check required fields
     if (!name || !username || !password) {
@@ -185,6 +187,7 @@ export const registerUser = async (req, res) => {
       address,
       position,
       number,
+      nbm,
       role: role || 'user',
       status: status || 'active',
     });
@@ -192,7 +195,7 @@ export const registerUser = async (req, res) => {
     await newUser.save();
 
     res.status(201).json({
-      message: 'User berhasil didaftarkan',
+      message: 'ok',
       user: {
         id: newUser._id,
         name: newUser.name,

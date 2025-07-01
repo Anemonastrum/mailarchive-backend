@@ -8,29 +8,49 @@ export const getInboxList = async (req, res) => {
     const search = req.query.search || '';
 
     const query = {
-      $or: [
-        { number: { $regex: search, $options: 'i' } },
-        { origin: { $regex: search, $options: 'i' } },
-        { category: { $regex: search, $options: 'i' } },
-        { summary: { $regex: search, $options: 'i' } },
-        { status: 'done' },
+      $and: [
+        {
+          $or: [
+            { number: { $regex: search, $options: 'i' } },
+            { origin: { $regex: search, $options: 'i' } },
+            { category: { $regex: search, $options: 'i' } },
+            { summary: { $regex: search, $options: 'i' } },
+          ]
+        },
+        { status: 'done' }
       ]
     };
 
     const total = await Inbox.countDocuments(query);
+
     const inboxes = await Inbox.find(query)
-      .skip((page - 1) * limit)
-      .limit(limit)
+      .select('number date summary origin attachment createdAt')
       .sort({ createdAt: -1 });
+
+    const mapped = inboxes.map((doc) => ({
+      type: 'inbox',
+      _id: doc._id,
+      number: doc.number,
+      date: doc.date,
+      summary: doc.summary,
+      from: doc.origin,
+      attachment: doc.attachment,
+      attachmentUrls: doc.attachmentUrls,
+      createdAt: doc.createdAt,
+    }));
+
+    // Apply pagination manually
+    const start = (page - 1) * limit;
+    const paginated = mapped.slice(start, start + limit);
 
     res.status(200).json({
       message: 'ok',
-      inboxes,
+      inboxes: paginated,
       pagination: {
         total,
         page,
-        pages: Math.ceil(total / limit)
-      }
+        pages: Math.ceil(total / limit),
+      },
     });
   } catch (err) {
     res.status(500).json({ message: 'Server Error', err });
@@ -44,29 +64,49 @@ export const getOutboxList = async (req, res) => {
     const search = req.query.search || '';
 
     const query = {
-      $or: [
-        { number: { $regex: search, $options: 'i' } },
-        { destination: { $regex: search, $options: 'i' } },
-        { category: { $regex: search, $options: 'i' } },
-        { summary: { $regex: search, $options: 'i' } },
-        { sign: { $regex: search, $options: 'i' } },
+      $and: [
+        {
+          $or: [
+            { number: { $regex: search, $options: 'i' } },
+            { destination: { $regex: search, $options: 'i' } },
+            { category: { $regex: search, $options: 'i' } },
+            { summary: { $regex: search, $options: 'i' } },
+            { sign: { $regex: search, $options: 'i' } },
+          ]
+        },
+        { status: 'done' }
       ]
     };
 
     const total = await Outbox.countDocuments(query);
+
     const outboxes = await Outbox.find(query)
-      .skip((page - 1) * limit)
-      .limit(limit)
+      .select('number date summary destination attachment attachmentUrls createdAt')
       .sort({ createdAt: -1 });
+
+    const mapped = outboxes.map(doc => ({
+      type: 'outbox',
+      _id: doc._id,
+      number: doc.number,
+      date: doc.date,
+      summary: doc.summary,
+      from: doc.destination,
+      attachment: doc.attachment,
+      attachmentUrls: doc.attachmentUrls,
+      createdAt: doc.createdAt,
+    }));
+
+    const start = (page - 1) * limit;
+    const paginated = mapped.slice(start, start + limit);
 
     res.status(200).json({
       message: 'ok',
-      outboxes,
+      outboxes: paginated,
       pagination: {
         total,
         page,
-        pages: Math.ceil(total / limit)
-      }
+        pages: Math.ceil(total / limit),
+      },
     });
   } catch (err) {
     res.status(500).json({ message: 'Server Error', err });
@@ -94,11 +134,16 @@ export const getAllDocumentsList = async (req, res) => {
     };
 
     const outboxQuery = {
-      $or: [
-        { number: { $regex: search, $options: 'i' } },
-        { destination: { $regex: search, $options: 'i' } },
-        { category: { $regex: search, $options: 'i' } },
-        { summary: { $regex: search, $options: 'i' } },
+      $and: [
+        {
+          $or: [
+            { number: { $regex: search, $options: 'i' } },
+            { destination: { $regex: search, $options: 'i' } },
+            { category: { $regex: search, $options: 'i' } },
+            { summary: { $regex: search, $options: 'i' } },
+          ]
+        },
+        { status: 'done' } // Only include inboxes that are marked as done
       ]
     };
 

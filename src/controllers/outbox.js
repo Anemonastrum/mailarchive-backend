@@ -207,3 +207,53 @@ export const getOutboxById = async (req, res) => {
     }
 };
 
+//get outbox wait
+export const getOutboxDisposisi = async (req, res) => {
+    try {
+      const { page = 1, limit = 10, origin, createdBy } = req.query;
+  
+      const query = { status: 'wait' };
+      if (origin) query.origin = origin;
+      if (createdBy) query.createdBy = createdBy;
+  
+      const skip = (page - 1) * limit;
+  
+      const [outboxes, total] = await Promise.all([
+        Outbox.find(query)
+          .select('status date destination category summary createdBy number attachment')
+          .sort({ createdAt: -1 })
+          .skip(skip)
+          .limit(parseInt(limit)),
+        Outbox.countDocuments(query)
+      ]);
+  
+      res.status(200).json({
+        message: 'ok',
+        data: outboxes,
+        currentPage: parseInt(page),
+        totalPages: Math.ceil(total / limit),
+        totalData: total,
+      });
+    } catch (err) {
+      res.status(500).json({ message: 'Server Error', err });
+    }
+};
+
+export const updateOutboxVerif = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const outbox = await Outbox.findById(id);
+    if (!outbox) {
+      return res.status(404).json({ message: 'Outbox mail not found' });
+    }
+
+    outbox.status = 'done';
+    await outbox.save();
+
+    res.status(200).json({ message: 'Outbox updated successfully', outbox });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server Error', error: err.message });
+  }
+};
