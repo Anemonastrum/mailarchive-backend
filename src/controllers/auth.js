@@ -25,24 +25,6 @@ export const registerSuperAdmin = async (req, res) => {
   }
 };
 
-// register admin sama member
-export const registerAdminMember = async (req, res) => {
-
-  const { name, username, password, role } = req.body;
-
-  try {
-    let user = await User.findOne({ username });
-    if (user) return res.status(400).json({ errors: [{ message: 'member atau admin sudah ada' }] });
-
-    user = new User({ name, username, password, role });
-    await user.save();
-
-    res.status(201).json({ message: 'ok' });
-  } catch (err) {
-    res.status(500).json({ message: 'Server error', error: err.message });
-  }
-};
-
 // login
 export const loginUser = async (req, res, next) => {
 

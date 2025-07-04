@@ -19,7 +19,6 @@ export const createInbox = async (req, res) => {
     const exist = await Inbox.findOne({ number });
     if (exist) return res.status(400).json({ message: 'nomor surat sudah ada' });
 
-    // ✅ Access mailPic (required)
     const mailPicFile = req.files?.mailPic?.[0];
     if (!mailPicFile) {
       return res.status(400).json({ message: 'Gambar surat (mailPic) wajib diunggah' });

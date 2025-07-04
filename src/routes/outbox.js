@@ -2,8 +2,6 @@ import express from 'express';
 import multer from 'multer';
 
 import {
-  createOutbox,
-  updateOutbox,
   deleteOutbox,
   getOutbox,
   getOutboxById,
@@ -16,6 +14,10 @@ import {
   updateOutboxPDF
 } from '../controllers/pdf.js';
 
+import { createOutboxCheck, editOutboxCheck } from '../utils/validators.js'
+import { handleValidation } from '../utils/validationHandle.js'
+
+
 import auth from '../middleware/auth.js';
 import role from '../middleware/role.js';
 
@@ -26,8 +28,8 @@ router.get('/', auth, getOutbox);
 router.get('/verifikasi', auth, role('admin', 'superadmin'), getOutboxDisposisi);
 router.put('/verifikasi/:id', auth, role('superadmin'), updateOutboxVerif);
 router.get('/:id', auth, getOutboxById);
-router.post('/', auth, role('admin', 'superadmin'), upload.array('attachments'), createOutboxPDF);
-router.put('/:id', auth, role('admin', 'superadmin'), upload.array('attachments'), updateOutboxPDF);
+router.post('/', auth, role('admin', 'superadmin'), upload.array('attachments'), createOutboxCheck, handleValidation, createOutboxPDF);
+router.put('/:id', auth, role('admin', 'superadmin'), upload.array('attachments'), editOutboxCheck, handleValidation, updateOutboxPDF);
 router.delete('/:id', auth, role('admin', 'superadmin'), deleteOutbox);
 
 

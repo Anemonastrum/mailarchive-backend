@@ -14,6 +14,9 @@ import {
 import auth from '../middleware/auth.js';
 import role from '../middleware/role.js';
 
+import { handleValidation } from '../utils/validationHandle.js'
+import { createInboxCheck, editInboxCheck } from '../utils/validators.js'
+
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
 
@@ -28,6 +31,8 @@ router.post(
     { name: 'mailPic', maxCount: 1 },
     { name: 'attachments', maxCount: 10 },
   ]),
+  createInboxCheck,
+  handleValidation,
   createInbox
 );
 router.put(
@@ -38,6 +43,8 @@ router.put(
     { name: 'mailPic', maxCount: 1 },
     { name: 'attachments', maxCount: 10 },
   ]),
+  editInboxCheck,
+  handleValidation,
   updateInbox
 );
 router.delete('/:id', auth, role('admin', 'superadmin'), deleteInbox);
