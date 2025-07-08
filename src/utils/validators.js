@@ -42,7 +42,6 @@ export const createInboxCheck = [
   check('number', 'Number is required').not().isEmpty(),
   check('category', 'Category is required').not().isEmpty(),
   check('date', 'Date is required').not().isEmpty(),
-  check('recieveDate', 'RecieveDate is required').not().isEmpty(),
   check('origin', 'Origin is required').not().isEmpty(),
   check('summary', 'Summary is required').not().isEmpty(),
 ];
@@ -51,7 +50,6 @@ export const editInboxCheck = [
   check('number', 'Number is required').not().isEmpty(),
   check('category', 'Category is required').not().isEmpty(),
   check('date', 'Date is required').not().isEmpty(),
-  check('recieveDate', 'RecieveDate is required').not().isEmpty(),
   check('origin', 'Origin is required').not().isEmpty(),
   check('summary', 'Summary is required').not().isEmpty(),
 ];

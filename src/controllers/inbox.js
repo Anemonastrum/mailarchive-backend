@@ -21,7 +21,14 @@ export const createInbox = async (req, res) => {
 
     const mailPicFile = req.files?.mailPic?.[0];
     if (!mailPicFile) {
-      return res.status(400).json({ message: 'Gambar surat (mailPic) wajib diunggah' });
+      return res.status(400).json({ message: 'Gambar surat wajib diunggah' });
+    }
+
+    if (
+      !mailPicFile.mimetype.startsWith('image/') &&
+      mailPicFile.mimetype !== 'application/pdf'
+    ) {
+      return res.status(400).json({ message: 'File surat harus berupa gambar atau PDF' });
     }
 
     const mailPicExt = mailPicFile.originalname.split('.').pop();
@@ -38,10 +45,17 @@ export const createInbox = async (req, res) => {
 
     const mailUrl = `${process.env.MINIO_PUBLIC_URL}/${BUCKET_NAME}/${mailPicName}`;
 
-    // ✅ Optional: attachments
     const attachmentUrls = [];
     const attachments = req.files?.attachments || [];
     for (const file of attachments) {
+
+      if (
+        !file.mimetype.startsWith('image/') &&
+        file.mimetype !== 'application/pdf'
+      ) {
+        return res.status(400).json({ message: `File lampiran harus berupa gambar atau PDF` });
+      }
+
       const ext = file.originalname.split('.').pop();
       const fileName = `${crypto.randomUUID()}.${ext}`;
       const mimeType = file.mimetype || 'application/octet-stream';
@@ -108,6 +122,14 @@ export const updateInbox = async (req, res) => {
 
     const mailPic = req.files?.mailPic?.[0];
     if (mailPic) {
+
+      if (
+        !mailPic.mimetype.startsWith('image/') &&
+        mailPic.mimetype !== 'application/pdf'
+      ) {
+        return res.status(400).json({ message: 'File surat harus berupa gambar atau PDF' });
+      }
+
       if (inbox.mailUrl) {
         const oldMailPicObject = inbox.mailUrl.split(`/${BUCKET_NAME}/`)[1];
         if (oldMailPicObject) {
@@ -132,6 +154,16 @@ export const updateInbox = async (req, res) => {
 
     const attachments = req.files?.attachments || [];
     if (attachments.length > 0) {
+
+      for (const file of attachments) {
+        if (
+          !file.mimetype.startsWith('image/') &&
+          file.mimetype !== 'application/pdf'
+        ) {
+          return res.status(400).json({ message: `File lampiran harus berupa gambar atau PDF` });
+        }
+      }
+
       if (inbox.attachmentUrls && inbox.attachmentUrls.length > 0) {
         for (const url of inbox.attachmentUrls) {
           const objectName = url.split(`/${BUCKET_NAME}/`)[1];

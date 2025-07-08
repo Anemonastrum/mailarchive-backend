@@ -40,9 +40,28 @@ export const createOutboxPDF = async (req, res) => {
     let attachmentUrls = [];
     if (req.files && req.files.length > 0) {
       for (const file of req.files) {
-        const ext = file.originalname.split('.').pop();
+
+        if (
+          !file.mimetype.startsWith("image/") &&
+          file.mimetype !== "application/pdf"
+        ) {
+          return res
+            .status(400)
+            .json({
+              message: `File lampiran harus berupa gambar atau PDF`,
+            });
+        }
+
+        const ext = file.originalname.split(".").pop();
         const fileName = `${crypto.randomUUID()}.${ext}`;
-        await minioClient.putObject(BUCKET_NAME, fileName, file.buffer, file.size, file.mimetype);
+
+        await minioClient.putObject(
+          BUCKET_NAME,
+          fileName,
+          file.buffer,
+          file.size,
+          file.mimetype
+        );
         const fileUrl = `${PUBLIC_URL}/${BUCKET_NAME}/${fileName}`;
         attachmentUrls.push(fileUrl);
       }
@@ -340,6 +359,16 @@ export const updateOutboxPDF = async (req, res) => {
     if (req.files && req.files.length > 0) {
       attachmentUrls = [];
       for (const file of req.files) {
+
+        if (
+          !file.mimetype.startsWith('image/') &&
+          file.mimetype !== 'application/pdf'
+        ) {
+          return res.status(400).json({
+            message: `File lampiran harus berupa gambar atau PDF`,
+          });
+        }
+
         const ext = file.originalname.split('.').pop();
         const fileName = `${crypto.randomUUID()}.${ext}`;
         await minioClient.putObject(BUCKET_NAME, fileName, file.buffer, file.size, file.mimetype);
