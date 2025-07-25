@@ -19,6 +19,10 @@ export const createInbox = async (req, res) => {
     const exist = await Inbox.findOne({ number });
     if (exist) return res.status(400).json({ message: 'nomor surat sudah ada' });
 
+    if (new Date(recievedDate) < new Date(date)) {
+      return res.status(400).json({ message: 'tinggal diterima tidak valid' });
+    };
+
     const mailPicFile = req.files?.mailPic?.[0];
     if (!mailPicFile) {
       return res.status(400).json({ message: 'Gambar surat wajib diunggah' });
